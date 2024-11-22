@@ -1,73 +1,71 @@
-router1_vars:
-  hostname: vyos1
-  interfaces:
-    - name: eth0
-      ip:
-      subnet_mask:
-      description: mgmt
-    - name: eth1
-      ip:
-      subnet_mask:
-      description: sync
-    - name: eth2
-      ip:
-      subnet_mask:
-      description: mpls
-  ha:
-    priorty: 200
-    ha_source_address:
-    ha_peer_address: {{ router2_vars.ha.ha_source_address }}
+router_vars:
+  - hostname: vyos1
+    interfaces:
+      - name: eth0
+        ip:
+        subnet_mask:
+        description: mgmt
+      - name: eth1
+        ip:
+        subnet_mask:
+        description: sync
+      - name: eth2
+        ip:
+        subnet_mask:
+        description: mpls
+    ha:
+#      priorty: 200
+#      ha_source_address: "{{ router_vars | selectattr('hostname', 'equalto', 'vyos2') | map(attribute='interfaces') | selectattr('name', 'equalto', ha_interfaces) | map(attribute='ip') | list | first }}"
+#      ha_peer_address: "{{ router_vars | selectattr('hostname', 'equalto', 'vyos2') | map(attribute='ha.ha_source_address') | list | first }}"
+  - hostname: vyos2
+    interfaces:
+      - name: eth0
+        ip:
+        subnet_mask:
+        description: mgmt
+      - name: eth1
+        ip:
+        subnet_mask:
+        description: sync
+      - name: eth2
+        ip:
+        subnet_mask:
+        description: mpls
+    ha:
+#      priorty: 100
+#      ha_source_address: "{{ router_vars | selectattr('hostname', 'equalto', 'vyos1') | map(attribute='interfaces') | selectattr('name', 'equalto', ha_interfaces) | map(attribute='ip') | list | first }}"
+#      ha_peer_address: "{{ router_vars | selectattr('hostname', 'equalto', 'vyos1') | map(attribute='ha.ha_source_address') | list | first }}"
 
-router2_vars:
-  hostname: vyos2
-  interfaces:
-    - name: eth0
-      ip:
-      subnet_mask:
-      description: mgmt
-    - name: eth1
-      ip:
-      subnet_mask:
-      description: sync
-    - name: eth2
-      ip:
-      subnet_mask:
-      description: mpls
-  ha:
-    priorty: 100
-    ha_source_address:
-    ha_peer_address: {{ router1_vars.ha.ha_source_address }}
+# HA vars
+#ha_group_name: "hagroup"
+#vrid: 10
+ha_interfaces: "eth2"
+ha_vip:
 
-ha_vars:
-  group_name: hagroup
-  vrid: 10
-  ha_interfaces: eth2
-  vip:
+# IPsec VTI tunnel vars
+tunnel_name: vti0
+tunnel_address: 
+tunnel_interface: eth2
+source_address: {{ ha_vip }}
+remote_address:
+pre_shared_key:
+  name: pre_shared_key
+  secret:
+ike:
+#  group_name: ikegroup
+#  ike_version: ikev2
+#  proposal: 1
+#  encryption: aes256
+#  hash: sha1
+  dh_group:
+esp:
+#  group_name: espgroup
+#  proposal: 1
+#  encryption: aes256
+#  hash: sha1
+#  mode: tunnel
 
-ipsec_vti_tunnel_vars:
-  tunnel_name: vti0
-  tunnel_address: 
-  tunnel_interface: eth2
-  source_address: {{ ha_vars.vip }}
-  remote_address:
-  pre-share-key:
-    - name: pre-shared-key
-    - secret:
-  ike:
-    - group_name:
-    - ike_version:
-    - proposal: 1
-    - encryption: aes256
-    - hash: sha1
-    - dh_group:
-  esp:
-    - group_name:
-    - proposal: 1
-    - encryption: aes256
-    - hash: sha1
-    - mode: tunnel
-
-monitoring:
-  prometheus_username: vyos
-  prometheus_password: vyos
-  prometheus_port: 9273
+#monitoring
+#prometheus_username: vyos
+#prometheus_password: vyos
+#prometheus_port: 9273

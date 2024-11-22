@@ -10,9 +10,9 @@
 - name: Configure psk
   vyos_config:
     lines:
-      - set vpn ipsec authentication psk "{{ pre-share-key.name }}" id "{{ source_address }}"
-      - set vpn ipsec authentication psk "{{ pre-share-key.name }}" id "{{ remote_address }}"
-      - set vpn ipsec authentication psk "{{ pre-share-key.name }}" secret "{{ pre-share-key.secret }}"
+      - set vpn ipsec authentication psk "{{ pre_shared_key.name }}" id "{{ source_address }}"
+      - set vpn ipsec authentication psk "{{ pre_shared_key.name }}" id "{{ remote_address }}"
+      - set vpn ipsec authentication psk "{{ pre_shared_key.name }}" secret "{{ pre_shared_key.secret }}"
   tags: vti-ipsec-tunnel
 
 - name: Configure ike
