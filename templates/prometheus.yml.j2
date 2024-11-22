@@ -1,0 +1,14 @@
+global:
+  scrape_interval: "30s"
+  scrape_timeout: "20s"
+
+scrape_configs:
+  - job_name: prometheus
+    static_configs:
+      - targets: ['localhost:9090']
+      
+  - job_name: vyos_router
+    static_configs:
+{% for router in vyos_routers %}
+      - '{{ hostvars[router].interfaces | selectattr("description", "equalto", "mgmt") | map(attribute="ip") | list | first }}:9105'
+{% endfor %}

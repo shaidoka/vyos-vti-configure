@@ -1,0 +1,38 @@
+---
+- name: Set hostname
+  vyos_config:
+    lines:
+      - set system host-name "{{ hostname }}"
+  tags:
+    - hostname
+
+- name: Configure interfaces
+  vyos_config:
+    lines:
+      - set interfaces ethernet "{{ item.name }} address {{ item.ip }}/{{ item.subnet_mask }}"
+      - set interfaces ethernet "{{ item.name }} description {{ item.description }}"
+  with_items: "{{ interfaces }}"
+  tags:
+    - interfaces
+
+- name: Configure HA
+  vyos_config:
+    lines:
+      - set high-availability vrrp group "{{ group_name }}" vrid "{{ vrid }}"
+      - set high-availability vrrp group "{{ group_name }}" interface "{{ ha_interfaces }}"
+      - set high-availability vrrp group "{{ group_name }}" virtual-address "{{ vip }}"
+      - set high-availability vrrp group "{{ group_name }}" priority "{{ ha_priorty }}"
+      - set high-availability vrrp group "{{ group_name }}" hello-source-address "{{ ha_source_address }}"
+      - set high-availability vrrp group "{{ group_name }}" peer-address "{{ ha_peer_address }}"
+      - set high-availability vrrp group "{{ group_name }}" advertise-interval '1'
+      - set high-availability vrrp group "{{ group_name }}" preempt-delay '30'
+  tags:
+    - ha
+
+- name: Check if VIP is reachable
+  command: ping -c 1 -W 10 {{ vip }}
+  register: ping_result
+  changed_when: false
+  failed_when: ping_result.rc != 0
+  tags:
+    - ha

@@ -1,0 +1,51 @@
+---
+# Tôi muốn task này lấy được IP mà giao tiếp với IP có description "mgmt" của router
+- name: Get the IP of ansible management server
+  shell: hostname -I
+  register: ansible_ip
+  delegate_to: localhost
+  tags: monitoring
+
+- name: Get Host IP
+  shell: echo $SSH_CONNECTION | awk '{print $3}'
+  register: ipaddr
+  tags: monitoring
+
+- name: Configure prometheus-client
+  vyos_config:
+    lines:
+      - set service monitoring telegraf prometheus-client
+      - set service monitoring telegraf prometheus-client allow-from "{{ ansible_ip.stdout }}/32"
+      - set service monitoring telegraf prometheus-client username "{{ prometheus_username }}"
+      - set service monitoring telegraf prometheus-client password "{{ prometheus_password }}"
+      - set service monitoring telegraf prometheus-client listen-address "{{ ipaddr }}"
+      - set service monitoring telegraf prometheus-client metric-version 2
+      - set service monitoring telegraf prometheus-client port "{{ prometheus_port }}"
+  tags: monitoring
+
+- name: Install prometheus block
+  block:
+  - name: Install docker
+    apt:
+      name: docker.io
+      state: present
+
+  - name: Templating prometheus.yml
+    template:
+      src: templates/prometheus.yml.j2
+      dest: /etc/prometheus/prometheus.yml
+    
+  - name: Start prometheus container
+    docker_container:
+      name: prometheus
+      image: prom/prometheus
+      state: started
+      restart_policy: always
+      ports:
+        - "9090:9090"
+      volumes:
+        - /etc/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      env:
+        PROMETHEUS_USER: "{{ prometheus_username }}"
+        PROMETHEUS_PASSWORD: "{{ prometheus_password }}"
+  tags: monitoring

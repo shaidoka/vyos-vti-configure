@@ -1,0 +1,48 @@
+---
+- name: Create tunnel VTI ipsec
+  vyos_config:
+    lines:
+      - set interfaces vti "{{ tunnel_name }}" address "{{ tunnel_address }}"
+      - set vpn ipsec interface "{{ tunnel_interface }}"
+      - set vpn ipsec log level '1'
+  tags: vti-ipsec-tunnel
+
+- name: Configure psk
+  vyos_config:
+    lines:
+      - set vpn ipsec authentication psk "{{ pre-share-key.name }}" id "{{ source_address }}"
+      - set vpn ipsec authentication psk "{{ pre-share-key.name }}" id "{{ remote_address }}"
+      - set vpn ipsec authentication psk "{{ pre-share-key.name }}" secret "{{ pre-share-key.secret }}"
+  tags: vti-ipsec-tunnel
+
+- name: Configure ike
+  vyos_config:
+    lines:
+      - set vpn ipsec ike-group "{{ ike.group_name }}" proposal "{{ ike.proposal }}" dh-group "{{ ike.dh_group }}"
+      - set vpn ipsec ike-group "{{ ike.group_name }}" key-exchange "{{ ike.ike_version }}"
+      - set vpn ipsec ike-group "{{ ike.group_name }}" proposal "{{ ike.proposal }}" hash "{{ ike.hash }}"
+      - set vpn ipsec ike-group "{{ ike.group_name }}" proposal "{{ ike.proposal }}" encryption "{{ ike.encryption }}"
+  tags: vti-ipsec-tunnel
+
+- name: Configure esp
+  vyos_config:
+    lines:
+      - set vpn ipsec esp-group "{{ esp.group_name }}" mode "{{ esp.mode }}"
+      - set vpn ipsec esp-group "{{ esp.group_name }}" proposal "{{ esp.proposal }}" encryption "{{ esp.encryption }}"
+      - set vpn ipsec esp-group "{{ esp.group_name }}" proposal "{{ esp.proposal }}" hash "{{ esp.hash }}"
+  tags: vti-ipsec-tunnel
+
+- name: Configure vpn site-to-site
+  vyos_config:
+    lines:
+      - set vpn ipsec site-to-site peer "{{ remote_address }}" authentication mode 'pre-shared-secret'
+      - set vpn ipsec site-to-site peer "{{ remote_address }}" authentication local-id "{{ source_address }}"
+      - set vpn ipsec site-to-site peer "{{ remote_address }}" authentication remote-id "{{ remote_address }}"
+      - set vpn ipsec site-to-site peer "{{ remote_address }}" connection-type 'initiate'
+      - set vpn ipsec site-to-site peer "{{ remote_addresS }}" default-esp-group "{{ esp.group_name }}"
+      - set vpn ipsec site-to-site peer "{{ remote_address }}" ike-group "{{ ike.group_name }}"
+      - set vpn ipsec site-to-site peer "{{ remote_address }}" local-address "{{ source_address }}"
+      - set vpn ipsec site-to-site peer "{{ remote_address }}" remote-address "{{ remote_address }}"
+      - set vpn ipsec site-to-site peer "{{ remote_address }}" vti bind "{{ tunnel_name }}"
+      - set vpn ipsec site-to-site peer "{{ remote_address }}" vti esp-group "{{ esp.group_name }}"
+  tags: vti-ipsec-tunnel
