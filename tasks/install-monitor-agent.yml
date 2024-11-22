@@ -49,3 +49,4 @@
         PROMETHEUS_USER: "{{ prometheus_username }}"
         PROMETHEUS_PASSWORD: "{{ prometheus_password }}"
   tags: monitoring
+  delegate_to: localhost
