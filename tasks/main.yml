@@ -1,1 +1,4 @@
 ---
+- include_tasks: configure-interface.yml
+- include_tasks: configure-vti-ipsec.yml
+- include_tasks: install-monitor-agent.yml
