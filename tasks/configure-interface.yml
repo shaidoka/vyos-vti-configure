@@ -37,7 +37,7 @@
     - ha
 
 - name: Check if VIP is reachable
-  command: ping -c 1 -W 10 {{ ha_vip }}
+  command: ping -c 1 -W 10 "{{ ha_vip }}"
   register: ping_result
   changed_when: false
   failed_when: ping_result.rc != 0

@@ -46,7 +46,7 @@ ha_vip:
 tunnel_name: vti0
 tunnel_address: 
 tunnel_interface: eth2
-source_address: {{ ha_vip }}
+source_address: "{{ ha_vip }}"
 remote_address:
 pre_shared_key:
   name: pre_shared_key
