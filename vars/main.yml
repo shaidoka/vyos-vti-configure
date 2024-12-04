@@ -15,8 +15,7 @@ router_vars:
         description: mpls
     ha:
       priority: 200
-#      ha_source_address: "{{ router_vars | selectattr('hostname', 'equalto', 'vyos2') | map(attribute='interfaces') | selectattr('name', 'equalto', ha_interfaces) | map(attribute='ip') | list | first }}"
-#      ha_peer_address: "{{ router_vars | selectattr('hostname', 'equalto', 'vyos2') | map(attribute='ha.ha_source_address') | list | first }}"
+
   - hostname: vyos2
     interfaces:
       - name: eth0
@@ -33,8 +32,6 @@ router_vars:
         description: mpls
     ha:
       priority: 100
-#      ha_source_address: "{{ router_vars | selectattr('hostname', 'equalto', 'vyos1') | map(attribute='interfaces') | selectattr('name', 'equalto', ha_interfaces) | map(attribute='ip') | list | first }}"
-#      ha_peer_address: "{{ router_vars | selectattr('hostname', 'equalto', 'vyos1') | map(attribute='ha.ha_source_address') | list | first }}"
 
 # HA vars
 #ha_group_name: "hagroup"
