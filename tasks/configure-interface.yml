@@ -3,12 +3,13 @@
   vyos_config:
     lines:
       - set system host-name "{{ inventory_hostname }}"
+    save: true
   tags:
     - hostname
 
 - name: Get current router variables
   set_fact:
-    current_router_vars: "{{ router_vars | selectattr('hostname', 'equalto', inventory_hostname) | list | first | default([]) + [item] }}"
+    current_router_vars: "{{ router_vars | selectattr('hostname', 'equalto', inventory_hostname) | list | first | default([]) }}"
   tags:
     - interfaces
     - ha
@@ -16,28 +17,44 @@
 - name: Configure interfaces
   vyos_config:
     lines:
-      - set interfaces ethernet "{{ item.name }} address {{ item.ip }}/{{ item.subnet_mask }}"
-      - set interfaces ethernet "{{ item.name }} description {{ item.description }}"
-  with_items: "{{ current_router_vars[0].interfaces }}"
+      - set interfaces ethernet "{{ item.name }}" address "{{ item.ip }}"/"{{ item.subnet_mask }}"
+      - set interfaces ethernet "{{ item.name }}" description "{{ item.description }}"
+    save: true
+  with_items: "{{ current_router_vars.interfaces }}"
   tags:
     - interfaces
+
+- name: Get peer router interfaces
+  set_fact:
+    peer_router_interfaces: "{{ router_vars | rejectattr('hostname', 'equalto', current_router_vars.hostname) | map(attribute='interfaces') | list | first | default([]) }}"
+
+- name: Get the interface IP which name equal to ha_interfaces
+  set_fact:
+    ha_source_address: "{{ current_router_vars.interfaces | selectattr('name', 'equalto', ha_interfaces) | map(attribute='ip') | list | first }}"
+    ha_peer_address: "{{ peer_router_interfaces | selectattr('name', 'equalto', ha_interfaces) | map(attribute='ip') | list | first }}"
+
+- name: Print HA address
+  debug:
+    msg: "HA source address: {{ ha_source_address }}, HA peer address: {{ ha_peer_address }}"
+  verbosity: 2
 
 - name: Configure HA
   vyos_config:
     lines:
       - set high-availability vrrp group "{{ ha_group_name }}" vrid "{{ vrid }}"
       - set high-availability vrrp group "{{ ha_group_name }}" interface "{{ ha_interfaces }}"
-      - set high-availability vrrp group "{{ ha_group_name }}" virtual-address "{{ ha_vip }}"
-      - set high-availability vrrp group "{{ ha_group_name }}" priority "{{ current_router_vars[0].ha.priority }}"
+      - set high-availability vrrp group "{{ ha_group_name }}" address "{{ ha_vip }}"
+      - set high-availability vrrp group "{{ ha_group_name }}" priority "{{ current_router_vars.ha.priority }}"
       - set high-availability vrrp group "{{ ha_group_name }}" hello-source-address "{{ ha_source_address }}"
       - set high-availability vrrp group "{{ ha_group_name }}" peer-address "{{ ha_peer_address }}"
       - set high-availability vrrp group "{{ ha_group_name }}" advertise-interval '1'
       - set high-availability vrrp group "{{ ha_group_name }}" preempt-delay '30'
+    save: true
   tags:
     - ha
 
 - name: Check if VIP is reachable
-  command: ping -c 1 -W 10 "{{ ha_vip }}"
+  command: ping -c 1 -W 10 "{{ ha_vip.split('/')[0] }}"
   register: ping_result
   changed_when: false
   failed_when: ping_result.rc != 0

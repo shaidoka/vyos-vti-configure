@@ -24,19 +24,6 @@ source_address: {{ ha_vip }}
 pre_shared_key:
   name: pre_shared_key
   secret:
-ike:
-  group_name: ikegroup
-  ike_version: ikev2
-  proposal: 1
-  encryption: aes256
-  hash: sha1
-  dh_group:
-esp:
-  group_name: espgroup
-  proposal: 1
-  encryption: aes256
-  hash: sha1
-  mode: tunnel
 
 #monitoring
 prometheus_username: vyos

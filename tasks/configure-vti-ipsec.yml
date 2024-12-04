@@ -35,14 +35,14 @@
 - name: Configure vpn site-to-site
   vyos_config:
     lines:
-      - set vpn ipsec site-to-site peer "{{ remote_address }}" authentication mode 'pre-shared-secret'
-      - set vpn ipsec site-to-site peer "{{ remote_address }}" authentication local-id "{{ source_address }}"
-      - set vpn ipsec site-to-site peer "{{ remote_address }}" authentication remote-id "{{ remote_address }}"
-      - set vpn ipsec site-to-site peer "{{ remote_address }}" connection-type 'initiate'
-      - set vpn ipsec site-to-site peer "{{ remote_addresS }}" default-esp-group "{{ esp.group_name }}"
-      - set vpn ipsec site-to-site peer "{{ remote_address }}" ike-group "{{ ike.group_name }}"
-      - set vpn ipsec site-to-site peer "{{ remote_address }}" local-address "{{ source_address }}"
-      - set vpn ipsec site-to-site peer "{{ remote_address }}" remote-address "{{ remote_address }}"
-      - set vpn ipsec site-to-site peer "{{ remote_address }}" vti bind "{{ tunnel_name }}"
-      - set vpn ipsec site-to-site peer "{{ remote_address }}" vti esp-group "{{ esp.group_name }}"
+      - set vpn ipsec site-to-site peer "{{ remote_address | regex_replace("[^a-zA-Z0-9]", "_") }}" authentication mode 'pre-shared-secret'
+      - set vpn ipsec site-to-site peer "{{ remote_address | regex_replace("[^a-zA-Z0-9]", "_") }}" authentication local-id "{{ source_address }}"
+      - set vpn ipsec site-to-site peer "{{ remote_address | regex_replace("[^a-zA-Z0-9]", "_") }}" authentication remote-id "{{ remote_address }}"
+      - set vpn ipsec site-to-site peer "{{ remote_address | regex_replace("[^a-zA-Z0-9]", "_") }}" connection-type 'initiate'
+      - set vpn ipsec site-to-site peer "{{ remote_address | regex_replace("[^a-zA-Z0-9]", "_") }}" default-esp-group "{{ esp.group_name }}"
+      - set vpn ipsec site-to-site peer "{{ remote_address | regex_replace("[^a-zA-Z0-9]", "_") }}" ike-group "{{ ike.group_name }}"
+      - set vpn ipsec site-to-site peer "{{ remote_address | regex_replace("[^a-zA-Z0-9]", "_") }}" local-address "{{ source_address.split('/')[0] }}"
+      - set vpn ipsec site-to-site peer "{{ remote_address | regex_replace("[^a-zA-Z0-9]", "_") }}" remote-address "{{ remote_address }}"
+      - set vpn ipsec site-to-site peer "{{ remote_address | regex_replace("[^a-zA-Z0-9]", "_") }}" vti bind "{{ tunnel_name }}"
+      - set vpn ipsec site-to-site peer "{{ remote_address | regex_replace("[^a-zA-Z0-9]", "_") }}" vti esp-group "{{ esp.group_name }}"
   tags: vti-ipsec-tunnel

@@ -1,9 +1,7 @@
 ---
-# Tôi muốn task này lấy được IP mà giao tiếp với IP có description "mgmt" của router
 - name: Get the IP of ansible management server
-  shell: hostname -I
+  shell: echo $SSH_CONNECTION | awk '{print $1}'
   register: ansible_ip
-  delegate_to: localhost
   tags: monitoring
 
 - name: Get Host IP
@@ -16,9 +14,9 @@
     lines:
       - set service monitoring telegraf prometheus-client
       - set service monitoring telegraf prometheus-client allow-from "{{ ansible_ip.stdout }}/32"
-      - set service monitoring telegraf prometheus-client username "{{ prometheus_username }}"
-      - set service monitoring telegraf prometheus-client password "{{ prometheus_password }}"
-      - set service monitoring telegraf prometheus-client listen-address "{{ ipaddr }}"
+      - set service monitoring telegraf prometheus-client authentication username "{{ prometheus_username }}"
+      - set service monitoring telegraf prometheus-client authentication password "{{ prometheus_password }}"
+      - set service monitoring telegraf prometheus-client listen-address "{{ ipaddr.stdout }}"
       - set service monitoring telegraf prometheus-client metric-version 2
       - set service monitoring telegraf prometheus-client port "{{ prometheus_port }}"
   tags: monitoring
@@ -29,7 +27,12 @@
     apt:
       name: docker.io
       state: present
-
+  
+  - name: Create prometheus directory
+    file:
+      path: /etc/prometheus
+      state: directory
+    
   - name: Templating prometheus.yml
     template:
       src: templates/prometheus.yml.j2
@@ -49,4 +52,5 @@
         PROMETHEUS_USER: "{{ prometheus_username }}"
         PROMETHEUS_PASSWORD: "{{ prometheus_password }}"
   tags: monitoring
+  run_once: yes
   delegate_to: localhost
