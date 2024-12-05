@@ -33,10 +33,6 @@
     ha_source_address: "{{ current_router_vars.interfaces | selectattr('name', 'equalto', ha_interfaces) | map(attribute='ip') | list | first }}"
     ha_peer_address: "{{ peer_router_interfaces | selectattr('name', 'equalto', ha_interfaces) | map(attribute='ip') | list | first }}"
 
-- name: Print HA address
-  debug:
-    msg: "HA source address: {{ ha_source_address }}, HA peer address: {{ ha_peer_address }}"
-
 - name: Configure HA
   vyos_config:
     lines:

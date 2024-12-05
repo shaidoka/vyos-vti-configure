@@ -1,12 +1,12 @@
 ---
 - name: Get the IP of ansible management server
-  shell: echo $SSH_CONNECTION | awk '{print $1}'
+  shell: hostname -I | awk '{print $1}'
   register: ansible_ip
   tags: monitoring
 
 - name: Get Host IP
-  shell: echo $SSH_CONNECTION | awk '{print $3}'
-  register: ipaddr
+  set_facts:
+    ipaddr: "{{ ansible_host }}"
   tags: monitoring
 
 - name: Configure prometheus-client
