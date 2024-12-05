@@ -36,7 +36,6 @@
 - name: Print HA address
   debug:
     msg: "HA source address: {{ ha_source_address }}, HA peer address: {{ ha_peer_address }}"
-  verbosity: 2
 
 - name: Configure HA
   vyos_config:
@@ -50,13 +49,5 @@
       - set high-availability vrrp group "{{ ha_group_name }}" advertise-interval '1'
       - set high-availability vrrp group "{{ ha_group_name }}" preempt-delay '30'
     save: true
-  tags:
-    - ha
-
-- name: Check if VIP is reachable
-  command: ping -c 1 -W 10 "{{ ha_vip.split('/')[0] }}"
-  register: ping_result
-  changed_when: false
-  failed_when: ping_result.rc != 0
   tags:
     - ha

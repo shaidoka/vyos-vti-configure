@@ -3,14 +3,10 @@ router_vars:
     interfaces:
     ha:
       priorty: 200
-      ha_source_address: "{{ router_vars | selectattr('hostname', 'equalto', 'vyos2') | map(attribute='interfaces') | selectattr('name', 'equalto', ha_interfaces) | map(attribute='ip') | list | first }}"
-      ha_peer_address: "{{ router_vars | selectattr('hostname', 'equalto', 'vyos2') | map(attribute='ha.ha_source_address') | list | first }}"
   - hostname: vyos2
     interfaces:
     ha:
       priorty: 100
-      ha_source_address: "{{ router_vars | selectattr('hostname', 'equalto', 'vyos1') | map(attribute='interfaces') | selectattr('name', 'equalto', ha_interfaces) | map(attribute='ip') | list | first }}"
-      ha_peer_address: "{{ router_vars | selectattr('hostname', 'equalto', 'vyos1') | map(attribute='ha.ha_source_address') | list | first }}"
 
 #ha_vars
 ha_group_name: "hagroup"
@@ -20,7 +16,6 @@ ha_vip:
 
 #ipsec_vti_tunnel_vars
 tunnel_name: vti0
-source_address: {{ ha_vip }}
 pre_shared_key:
   name: pre_shared_key
   secret:
