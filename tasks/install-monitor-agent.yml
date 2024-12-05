@@ -52,5 +52,5 @@
         PROMETHEUS_USER: "{{ prometheus_username }}"
         PROMETHEUS_PASSWORD: "{{ prometheus_password }}"
   tags: monitoring
-  run_once: yes
+  run_once: true
   delegate_to: localhost
