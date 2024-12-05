@@ -11,7 +11,7 @@ scrape_configs:
     static_configs:
       - targets:
 {% for router in router_vars %}
-        - '{{ router.interfaces | selectattr("description", "equalto", "mgmt") | map(attribute="ip") | list | first }}:9105'
+        - '{{ router.interfaces | selectattr("description", "equalto", "mgmt") | map(attribute="ip") | list | first }}:{{ prometheus_port }}'
 {% endfor %}
     basic_auth:
       username: '{{ prometheus_username }}'
