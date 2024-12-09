@@ -5,7 +5,7 @@
   tags: monitoring
 
 - name: Get Host IP
-  set_facts:
+  set_fact:
     ipaddr: "{{ ansible_host }}"
   tags: monitoring
 
@@ -16,7 +16,7 @@
       - set service monitoring telegraf prometheus-client allow-from "{{ ansible_ip.stdout }}/32"
       - set service monitoring telegraf prometheus-client authentication username "{{ prometheus_username }}"
       - set service monitoring telegraf prometheus-client authentication password "{{ prometheus_password }}"
-      - set service monitoring telegraf prometheus-client listen-address "{{ ipaddr.stdout }}"
+      - set service monitoring telegraf prometheus-client listen-address "{{ ipaddr }}"
       - set service monitoring telegraf prometheus-client metric-version 2
       - set service monitoring telegraf prometheus-client port "{{ prometheus_port }}"
   tags: monitoring
@@ -37,6 +37,12 @@
     template:
       src: templates/prometheus.yml.j2
       dest: /etc/prometheus/prometheus.yml
+  
+  - name: Check if prometheus container exists
+    docker_container_info:
+      name: prometheus
+    register: prometheus_container_info
+    ignore_errors: true
     
   - name: Start prometheus container
     docker_container:
@@ -51,6 +57,7 @@
       env:
         PROMETHEUS_USER: "{{ prometheus_username }}"
         PROMETHEUS_PASSWORD: "{{ prometheus_password }}"
+    when: prometheus_container_info | length == 0
   tags: monitoring
   run_once: true
   delegate_to: localhost
